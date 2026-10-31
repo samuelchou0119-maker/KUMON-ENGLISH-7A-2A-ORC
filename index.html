@@ -8,31 +8,34 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f6f9;
-            padding: 30px;
-            max-width: 600px;
-            margin: 0 auto;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            margin: 0;
         }
         .card {
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
             width: 100%;
+            max-width: 500px;
             text-align: center;
         }
+        h2 { color: #2c3e50; margin-bottom: 20px; }
         .btn {
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 14px 24px;
+            font-size: 17px;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 8px;
             border: none;
             color: white;
             margin: 8px 5px;
             font-weight: bold;
+            width: 100%;
+            transition: 0.2s;
         }
         .btn-success { background-color: #28a745; }
         .btn-success:hover { background-color: #218838; }
@@ -45,23 +48,24 @@
             font-size: 16px;
             border-radius: 6px;
             margin-right: 10px;
+            width: 60%;
         }
         .word-box {
-            font-size: 48px;
+            font-size: 52px;
             font-weight: bold;
-            margin: 20px 0 10px 0;
+            margin: 25px 0 10px 0;
             color: #d9534f;
             letter-spacing: 2px;
             text-transform: uppercase;
         }
         .meaning-box {
-            font-size: 22px;
+            font-size: 24px;
             color: #6c757d;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             font-weight: bold;
         }
         .status-box {
-            margin-top: 15px;
+            margin-top: 20px;
             padding: 15px;
             border-radius: 8px;
             font-size: 16px;
@@ -78,12 +82,10 @@
     <div class="card">
         <h2>KUMON 英文口說練功坊</h2>
         
-        <div style="margin-bottom: 15px;">
-            <label for="levelSelect">選擇級別：</label>
-            <select id="levelSelect">
-                <option value="">載入中...</option>
+        <div style="margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
+            <select id="levelSelect" onchange="loadWordsForLevel()">
+                <!-- 動態載入級別 -->
             </select>
-            <button class="btn btn-primary" onclick="loadWordsForLevel()">載入單字</button>
         </div>
 
         <!-- 顯示單字與中文解釋 -->
@@ -99,38 +101,25 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwj4-pG4KbhxwkYRwmggwcLVDB30aqT7riSo2p2lOM1SUP8AoZHwPYModjYR5zKWQc/exec";
-        
-        // 🛡️ 內建備份單字庫（萬一雲端斷線，依然可以正常運作練習！）
-        const fallbackData = {
+        // 完整的 KUMON 7A-2A 所有 261 個單字資料庫（確保絕對不會缺單字）
+        const fullDatabase = {
             "7A": [
-                { word: "dog", meaning: "狗" },
-                { word: "cat", meaning: "貓" },
-                { word: "cow", meaning: "乳牛" },
-                { word: "rabbit", meaning: "兔子" },
-                { word: "apple", meaning: "蘋果" }
+                {word: "dog", meaning: "狗"}, {word: "cat", meaning: "貓"}, {word: "cow", meaning: "乳牛"}, {word: "rabbit", meaning: "兔子"}, {word: "car", meaning: "汽車"}, {word: "bus", meaning: "公車"}, {word: "bike", meaning: "腳踏車"}, {word: "truck", meaning: "卡車"}, {word: "egg", meaning: "蛋"}, {word: "milk", meaning: "牛奶"}, {word: "bread", meaning: "麵包"}, {word: "butter", meaning: "奶油"}, {word: "apple", meaning: "蘋果"}, {word: "lemon", meaning: "檸檬"}, {word: "banana", meaning: "香蕉"}, {word: "orange", meaning: "橘子"}, {word: "eye", meaning: "眼睛"}, {word: "ear", meaning: "耳朵"}, {word: "nose", meaning: "鼻子"}, {word: "mouth", meaning: "嘴巴"}, {word: "hand", meaning: "手"}, {word: "foot", meaning: "腳"}, {word: "hair", meaning: "頭髮"}, {word: "head", meaning: "頭"}, {word: "bed", meaning: "床"}, {word: "piano", meaning: "鋼琴"}, {word: "desk", meaning: "書桌"}, {word: "chair", meaning: "椅子"}, {word: "sofa", meaning: "沙發"}, {word: "table", meaning: "桌子"}, {word: "tv", meaning: "電視"}, {word: "door", meaning: "門"}, {word: "bag", meaning: "提袋/包包"}, {word: "cap", meaning: "帽子(鴨舌帽)"}, {word: "coat", meaning: "外套/大衣"}, {word: "shoe", meaning: "鞋子"}, {word: "lion", meaning: "獅子"}, {word: "bear", meaning: "熊"}, {word: "sheep", meaning: "綿羊"}, {word: "deer", meaning: "鹿"}, {word: "sea", meaning: "海"}, {word: "sun", meaning: "太陽"}, {word: "star", meaning: "星星"}, {word: "moon", meaning: "月亮"}, {word: "ship", meaning: "船(輪船)"}, {word: "train", meaning: "火車"}, {word: "boat", meaning: "小船"}, {word: "plane", meaning: "飛機"}, {word: "cup", meaning: "杯子"}, {word: "fork", meaning: "叉子"}, {word: "spoon", meaning: "湯匙"}, {word: "plate", meaning: "盤子"}, {word: "corn", meaning: "玉米"}, {word: "carrot", meaning: "胡蘿蔔"}, {word: "potato", meaning: "馬鈴薯"}, {word: "tomato", meaning: "番茄"}, {word: "pants", meaning: "長褲"}, {word: "sock", meaning: "襪子"}, {word: "shirt", meaning: "襯衫"}, {word: "skirt", meaning: "裙子"}, {word: "sky", meaning: "天空"}, {word: "tree", meaning: "樹"}, {word: "rain", meaning: "雨"}, {word: "flower", meaning: "花"}
             ],
             "6A": [
-                { word: "red", meaning: "紅色的" },
-                { word: "blue", meaning: "藍色的" },
-                { word: "yellow", meaning: "黃色的" }
+                {word: "red", meaning: "紅色的"}, {word: "blue", meaning: "藍色的"}, {word: "yellow", meaning: "黃色的"}, {word: "pink", meaning: "粉紅色的"}, {word: "green", meaning: "綠色的"}, {word: "brown", meaning: "棕色的"}, {word: "black", meaning: "黑色的"}, {word: "white", meaning: "白色的"}, {word: "one", meaning: "一"}, {word: "two", meaning: "二"}, {word: "three", meaning: "三"}, {word: "four", meaning: "四"}, {word: "five", meaning: "五"}, {word: "six", meaning: "六"}, {word: "seven", meaning: "七"}, {word: "eight", meaning: "八"}, {word: "nine", meaning: "九"}, {word: "ten", meaning: "十"}, {word: "duck", meaning: "鴨子"}, {word: "ball", meaning: "球"}, {word: "book", meaning: "書"}, {word: "umbrella", meaning: "雨傘"}, {word: "bird", meaning: "鳥"}, {word: "pencil", meaning: "鉛筆"}, {word: "leaf", meaning: "葉子"}, {word: "dress", meaning: "洋裝"}, {word: "big", meaning: "大的"}, {word: "box", meaning: "盒子/箱子"}, {word: "small", meaning: "小的"}, {word: "fish", meaning: "魚"}, {word: "hat", meaning: "帽子(有簷帽)"}, {word: "long", meaning: "長的"}, {word: "short", meaning: "短的/矮的"}, {word: "tie", meaning: "領帶"}, {word: "belt", meaning: "皮帶"}, {word: "ruler", meaning: "尺"}, {word: "tall", meaning: "高的"}, {word: "boy", meaning: "男孩"}, {word: "girl", meaning: "女孩"}, {word: "glass", meaning: "玻璃杯"}, {word: "new", meaning: "新的"}, {word: "old", meaning: "舊的"}, {word: "clock", meaning: "時鐘"}, {word: "house", meaning: "房子"}, {word: "fridge", meaning: "冰箱"}, {word: "heavy", meaning: "重的"}, {word: "light", meaning: "輕的"}, {word: "rock", meaning: "岩石/石頭"}, {word: "thick", meaning: "厚的"}, {word: "thin", meaning: "薄的"}, {word: "blanket", meaning: "毯子"}, {word: "sweater", meaning: "毛衣"}, {word: "fast", meaning: "快的"}, {word: "slow", meaning: "慢的"}, {word: "horse", meaning: "馬"}, {word: "left", meaning: "左邊的"}, {word: "right", meaning: "右邊的"}, {word: "leg", meaning: "腿"}, {word: "arm", meaning: "手臂"}, {word: "wing", meaning: "翅膀"}
             ],
             "5A": [
-                { word: "sunny", meaning: "晴朗的" },
-                { word: "walk", meaning: "走路" },
-                { word: "run", meaning: "跑步" }
+                {word: "o'clock", meaning: "點鐘"}, {word: "sunny", meaning: "晴朗的"}, {word: "cloudy", meaning: "多雲的"}, {word: "snow", meaning: "雪/下雪"}, {word: "walk", meaning: "走路"}, {word: "run", meaning: "跑步"}, {word: "jump", meaning: "跳"}, {word: "swim", meaning: "游泳"}, {word: "sit", meaning: "坐"}, {word: "man", meaning: "男人"}, {word: "sleep", meaning: "睡覺"}, {word: "woman", meaning: "女人"}, {word: "sing", meaning: "唱歌"}, {word: "baby", meaning: "嬰兒"}, {word: "cry", meaning: "哭"}, {word: "laugh", meaning: "笑"}, {word: "turtle", meaning: "烏龜"}, {word: "fly", meaning: "飛"}, {word: "kite", meaning: "風箏"}, {word: "camera", meaning: "照相機"}, {word: "notebook", meaning: "筆記本"}, {word: "drum", meaning: "鼓"}, {word: "guitar", meaning: "吉他"}, {word: "bridge", meaning: "橋"}, {word: "full", meaning: "滿的"}, {word: "empty", meaning: "空的"}, {word: "bottle", meaning: "瓶子"}, {word: "doll", meaning: "洋娃娃"}
             ],
             "4A": [
-                { word: "ice", meaning: "冰塊" },
-                { word: "king", meaning: "國王" }
+                {word: "ice", meaning: "冰塊"}, {word: "jacket", meaning: "夾克外套"}, {word: "king", meaning: "國王"}, {word: "queen", meaning: "皇后/女王"}, {word: "toy", meaning: "玩具"}, {word: "vest", meaning: "背心"}, {word: "zebra", meaning: "斑馬"}, {word: "parrot", meaning: "鸚鵡"}, {word: "ant", meaning: "螞蟻"}, {word: "bat", meaning: "球棒"}, {word: "pen", meaning: "筆"}, {word: "ill", meaning: "生病的"}, {word: "insect", meaning: "昆蟲"}, {word: "dish", meaning: "盤子/碟子"}, {word: "pond", meaning: "池塘"}, {word: "fat", meaning: "胖的"}, {word: "fence", meaning: "柵欄"}, {word: "fox", meaning: "狐狸"}, {word: "hill", meaning: "山丘"}, {word: "honey", meaning: "蜂蜜"}, {word: "map", meaning: "地圖"}, {word: "mirror", meaning: "鏡子"}, {word: "monkey", meaning: "猴子"}, {word: "lamp", meaning: "檯燈"}, {word: "letter", meaning: "信件"}, {word: "lunch", meaning: "午餐"}, {word: "net", meaning: "網子"}, {word: "neck", meaning: "脖子"}, {word: "nest", meaning: "鳥巢"}, {word: "nut", meaning: "堅果"}, {word: "pig", meaning: "豬"}, {word: "river", meaning: "河流"}, {word: "sandwich", meaning: "三明治"}, {word: "taxi", meaning: "計程車"}, {word: "ticket", meaning: "票券"}, {word: "tunnel", meaning: "隧道"}, {word: "gate", meaning: "大門"}, {word: "golf", meaning: "高爾夫球"}, {word: "jam", meaning: "果醬"}, {word: "kick", meaning: "踢"}, {word: "kitchen", meaning: "廚房"}, {word: "violin", meaning: "小提琴"}, {word: "watch", meaning: "手錶"}, {word: "window", meaning: "窗戶"}, {word: "zipper", meaning: "拉鍊"}
             ],
             "3A": [
-                { word: "wall", meaning: "牆壁" },
-                { word: "cheese", meaning: "起司" }
+                {word: "wall", meaning: "牆壁"}, {word: "grass", meaning: "草地"}, {word: "glasses", meaning: "眼鏡"}, {word: "classroom", meaning: "教室"}, {word: "bench", meaning: "長凳"}, {word: "cheese", meaning: "起司"}, {word: "phone", meaning: "電話"}, {word: "elephant", meaning: "大象"}, {word: "photo", meaning: "照片"}, {word: "dolphin", meaning: "海豚"}, {word: "ring", meaning: "戒指"}, {word: "birthday", meaning: "生日"}, {word: "father", meaning: "爸爸"}, {word: "mother", meaning: "媽媽"}, {word: "breakfast", meaning: "早餐"}, {word: "drive", meaning: "駕駛/開車"}, {word: "drink", meaning: "喝"}, {word: "cloud", meaning: "雲朵"}, {word: "clean", meaning: "打掃/乾淨的"}, {word: "stick", meaning: "木棍"}, {word: "cake", meaning: "蛋糕"}, {word: "face", meaning: "臉"}, {word: "lake", meaning: "湖泊"}, {word: "salt", meaning: "鹽巴"}, {word: "computer", meaning: "電腦"}, {word: "music", meaning: "音樂"}, {word: "pull", meaning: "拉"}, {word: "push", meaning: "推"}, {word: "bee", meaning: "蜜蜂"}, {word: "tail", meaning: "尾巴"}, {word: "nail", meaning: "指甲/釘子"}, {word: "goat", meaning: "山羊"}, {word: "soap", meaning: "肥皂"}, {word: "mouse", meaning: "老鼠"}, {word: "mountain", meaning: "高山"}, {word: "zoo", meaning: "動物園"}, {word: "school", meaning: "學校"}, {word: "cook", meaning: "廚師/烹飪"}, {word: "wood", meaning: "木頭"}, {word: "cookie", meaning: "餅乾"}, {word: "tea", meaning: "茶"}, {word: "eat", meaning: "吃"}, {word: "meat", meaning: "肉"}, {word: "towel", meaning: "毛巾"}, {word: "arrow", meaning: "箭"}, {word: "crow", meaning: "烏鴉"}, {word: "rainbow", meaning: "彩虹"}, {word: "play", meaning: "玩耍"}, {word: "crayon", meaning: "蠟筆"}, {word: "gray", meaning: "灰色的"}, {word: "key", meaning: "鑰匙"}, {word: "money", meaning: "金錢"}, {word: "card", meaning: "卡片"}, {word: "park", meaning: "公園"}, {word: "tiger", meaning: "老虎"}, {word: "water", meaning: "水"}, {word: "dinner", meaning: "晚餐"}, {word: "nurse", meaning: "護理師"}
             ],
             "2A": [
-                { word: "basket", meaning: "籃子" },
-                { word: "snake", meaning: "蛇" }
+                {word: "basket", meaning: "籃子"}, {word: "snake", meaning: "蛇"}, {word: "newspaper", meaning: "報紙"}, {word: "building", meaning: "建築物"}, {word: "frog", meaning: "青蛙"}, {word: "drawer", meaning: "抽屜"}
             ]
         };
 
@@ -138,69 +127,36 @@
         let currentIndex = 0;
         let recognition = null;
 
-        window.onload = async function() {
-            try {
-                const response = await fetch(`${API_URL}?action=getLevels`);
-                const levels = await response.json();
-                const select = document.getElementById('levelSelect');
-                select.innerHTML = '';
-                
-                if (!levels || levels.length === 0) {
-                    throw new Error("無級別資料");
-                }
-                
-                levels.forEach(lvl => {
-                    const opt = document.createElement('option');
-                    opt.value = lvl;
-                    opt.innerText = `級別 ${lvl}`;
-                    select.appendChild(opt);
-                });
-
-                loadWordsForLevel();
-            } catch (err) {
-                console.warn("雲端連線失敗，自動切換至內建模式", err);
-                loadFallbackLevels();
-            }
-        };
-
-        function loadFallbackLevels() {
+        // 初始化選單
+        window.onload = function() {
             const select = document.getElementById('levelSelect');
             select.innerHTML = '';
-            Object.keys(fallbackData).forEach(lvl => {
+            
+            Object.keys(fullDatabase).forEach(lvl => {
                 const opt = document.createElement('option');
                 opt.value = lvl;
-                opt.innerText = `級別 ${lvl} (離線模式)`;
+                opt.innerText = `KUMON 級別 ${lvl} (共 ${fullDatabase[lvl].length} 個單字)`;
                 select.appendChild(opt);
             });
+
             loadWordsForLevel();
-        }
+        };
 
-        async function loadWordsForLevel() {
+        // 切換級別載入單字
+        function loadWordsForLevel() {
             const level = document.getElementById('levelSelect').value;
-            if (!level) return;
+            currentWords = fullDatabase[level] || [];
+            currentIndex = 0;
 
-            showStatus("正在讀取單字...", false);
-            try {
-                const response = await fetch(`${API_URL}?action=getWords&level=${level}`);
-                currentWords = await response.json();
-
-                if (!Array.isArray(currentWords) || currentWords.length === 0) {
-                    throw new Error("遠端無單字");
-                }
-                finishLoadingWords(level);
-            } catch (err) {
-                // 如果遠端失敗，改用備份資料
-                currentWords = fallbackData[level] || [{ word: "error", meaning: "載入失敗" }];
-                finishLoadingWords(level + " (備份)");
+            if (currentWords.length > 0) {
+                displayCurrentWord();
+                showStatus(`✅ 成功載入級別 ${level}！共有 ${currentWords.length} 個單字，開始練習吧！`, 'success');
+            } else {
+                showStatus('⚠️ 此級別尚無單字', 'error');
             }
         }
 
-        function finishLoadingWords(levelName) {
-            currentIndex = 0;
-            displayCurrentWord();
-            showStatus(`✅ 成功載入 ${levelName} 級別！共有 ${currentWords.length} 個單字，開始練習吧！`, false);
-        }
-
+        // 顯示單字與中文
         function displayCurrentWord() {
             if (currentWords.length > 0 && currentIndex < currentWords.length) {
                 const item = currentWords[currentIndex];
@@ -215,26 +171,23 @@
             const targetWord = currentWords[currentIndex].word;
             
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // 停止先前的聲音
+                window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(targetWord);
                 utterance.lang = 'en-US';
-                utterance.rate = 0.85; // 稍微放慢，讓小朋友聽更清楚
+                utterance.rate = 0.85; // 稍微放慢讓小孩聽清楚
                 window.speechSynthesis.speak(utterance);
             } else {
-                alert('您的瀏覽器不支援語音朗讀功能。');
+                alert('您的瀏覽器不支援語音功能');
             }
         }
 
         // 🎤 語音辨識與評分
         function startRecognition() {
-            if (currentWords.length === 0) {
-                alert('請先載入單字！');
-                return;
-            }
+            if (currentWords.length === 0) return;
 
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                showStatus("⚠️ 您的瀏覽器不支援語音辨識，請使用 Google Chrome。", true);
+                showStatus("⚠️ 您的瀏覽器不支援語音辨識，請使用 Google Chrome 瀏覽器。", true);
                 return;
             }
 
@@ -243,51 +196,48 @@
             recognition.continuous = false;
             recognition.interimResults = false;
 
-            showStatus("🎙️ 聆聽中... 請對著麥克風說出英文單字", false);
+            showStatus("🎙️ 聆聽中... 請對著麥克風大聲唸出單字！", 'info');
 
             recognition.onresult = function(event) {
                 const spokenText = event.results[0][0].transcript.trim().toLowerCase();
                 const targetWord = String(currentWords[currentIndex].word).trim().toLowerCase();
 
                 if (spokenText === targetWord) {
-                    showStatus(`⭐ 評分：100分！太棒了！<br>你正確唸出了：<b>${event.results[0][0].transcript}</b>`, false);
+                    showStatus(`⭐ 評分：100分！太棒了！<br>你正確唸出了：<b>${event.results[0][0].transcript}</b>`, 'success');
                     
+                    // 自動跳到下一個單字
                     setTimeout(() => {
                         currentIndex++;
                         if (currentIndex < currentWords.length) {
                             displayCurrentWord();
-                            showStatus("🎤 太棒了！請繼續唸下一個單字", false);
+                            showStatus("🎤 太棒了！請繼續唸下一個單字", 'info');
                         } else {
                             document.getElementById('wordDisplay').innerText = "🎉 恭喜通關！";
                             document.getElementById('meaningDisplay').innerText = "太厲害了";
-                            showStatus("🏆 這個級別的單字全部完美通關！", false);
+                            showStatus("🏆 這個級別的 261 個單字全部完美通關！", 'success');
                         }
                     }, 1500);
                 } else {
-                    showStatus(`❌ 哎呀，差一點點！<br>• 你唸成：<b>"${event.results[0][0].transcript}"</b><br>• 正確目標：<b>"${currentWords[currentIndex].word}" (${currentWords[currentIndex].meaning})</b><br>💡 點擊上方藍色按鈕再聽一次發音！`, true);
+                    showStatus(`❌ 哎呀，差一點點！<br>• 你唸成：<b>"${event.results[0][0].transcript}"</b><br>• 正確目標：<b>"${currentWords[currentIndex].word}" (${currentWords[currentIndex].meaning})</b><br>💡 點擊上方藍色按鈕再聽一次標準發音！`, 'error');
                 }
             };
 
             recognition.onerror = function(event) {
-                if (event.error === 'not-allowed') {
-                    showStatus("❌ 麥克風權限被拒絕。請點擊網址列左側鎖頭開啟麥克風權限。", true);
-                } else {
-                    showStatus(`❌ 辨識錯誤: ${event.error}，請再試一次`, true);
-                }
+                showStatus(`⚠️ 語音辨識發生狀況 (${event.error})，請再試一次！`, 'error');
             };
 
             try {
                 recognition.start();
             } catch (e) {
-                showStatus("⚠️ 請重新點擊開始按鈕", true);
+                showStatus("⚠️ 請重新點擊開始按鈕", 'error');
             }
         }
 
-        function showStatus(text, isError = false) {
+        function showStatus(message, type) {
             const statusBox = document.getElementById('statusMessage');
             statusBox.style.display = 'block';
-            statusBox.innerHTML = text;
-            statusBox.className = 'status-box ' + (isError ? 'status-error' : 'status-success');
+            statusBox.innerHTML = message;
+            statusBox.className = `status-box status-${type}`;
         }
     </script>
 </body>
