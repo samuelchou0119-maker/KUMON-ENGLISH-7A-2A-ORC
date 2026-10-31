@@ -1,222 +1,164 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KUMON 英文口說練功坊</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-        }
-        h2 { color: #2c3e50; margin-bottom: 20px; }
-        .btn {
-            padding: 14px 28px;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 8px;
-            border: none;
-            color: white;
-            margin: 10px 0;
-            width: 100%;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        .btn-success { background-color: #28a745; }
-        .btn-success:hover { background-color: #218838; }
-        .btn-primary { background-color: #007bff; }
-        .btn-primary:hover { background-color: #0056b3; }
-        select {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 6px;
-            margin-right: 10px;
-            width: 60%;
-        }
-        .word-box {
-            font-size: 52px;
-            font-weight: bold;
-            margin: 30px 0;
-            color: #d9534f;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        .status-box {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 17px;
-            font-weight: bold;
-            line-height: 1.5;
-        }
-        .status-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .status-info { background-color: #e2f0fb; color: #004085; border: 1px solid #b8daff; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KUMON 英文單字練習庫</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+      background-color: #f9f9f9;
+    }
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: none;
+      color: white;
+      margin: 5px;
+    }
+    .btn-success { background-color: #28a745; }
+    .btn-primary { background-color: #007bff; }
+    select { padding: 10px; font-size: 16px; border-radius: 6px; margin-right: 10px; }
+    .status-box { margin-top: 15px; padding: 12px; border-radius: 5px; font-weight: bold; }
+    .status-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>KUMON 英文口說練功坊</h2>
-        
-        <div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center;">
-            <select id="levelSelect">
-                <option value="">載入級別中...</option>
-            </select>
-            <button class="btn btn-primary" style="width: auto; margin: 0; padding: 10px 15px;" onclick="loadWordsForLevel()">載入單字</button>
-        </div>
-
-        <!-- 顯示要唸的英文單字 -->
-        <div id="wordDisplay" class="word-box">
-            請選擇級別
-        </div>
-
-        <div>
-            <button class="btn btn-success" onclick="startRecognition()">🎤 點我唸單字 (語音辨識)</button>
-        </div>
-
-        <div id="statusMessage" class="status-box" style="display: none;"></div>
+  <div class="card">
+    <h2>KUMON 英文口說練功坊 (GitHub 獨立前端)</h2>
+    
+    <div style="margin-bottom: 15px;">
+      <label for="levelSelect">選擇級別：</label>
+      <select id="levelSelect">
+        <option value="">載入中...</option>
+      </select>
+      <button class="btn btn-primary" onclick="loadWordsForLevel()">載入單字</button>
     </div>
 
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycby5hlX-192KdXv6GXF6y6umKYAJydeKWcnSpajsvr8D9uA7kFynL_U_2tZaU-zlgOFn/exec";
+    <div id="wordDisplay" style="font-size: 20px; font-weight: bold; margin: 15px 0; color: #333;">
+      請先選擇級別並載入單字
+    </div>
+
+    <div>
+      <button class="btn btn-success" onclick="startRecognition()">🎤 開始說英文單字進行辨識</button>
+    </div>
+
+    <div id="statusMessage" class="status-box" style="display: none;"></div>
+  </div>
+
+  <script>
+    // 已填入你剛剛部署成功的真實 API 網址
+    const API_URL = "https://script.google.com/macros/s/AKfycbwj4-pG4KbhxwkYRwmggwcLVDB30aqT7riSo2p2lOM1SUP8AoZHwPYModjYR5zKWQc/exec";
+
+    let currentWords = [];
+    let recognition = null;
+
+    // 網頁載入時自動取得級別清單
+    window.onload = async function() {
+      try {
+        const response = await fetch(`${API_URL}?action=getLevels`);
+        const levels = await response.json();
+        const select = document.getElementById('levelSelect');
+        select.innerHTML = '';
         
-        let currentWords = [];
-        let currentIndex = 0;
-        let recognition = null;
+        if (levels.length === 0) {
+          select.innerHTML = '<option value="">沒有找到級別資料</option>';
+          return;
+        }
 
-        // 網頁載入時自動取得級別
-        window.onload = async function () {
-            try {
-                const response = await fetch(`${API_URL}?action=getLevels`);
-                const levels = await response.json();
-                const select = document.getElementById('levelSelect');
-                select.innerHTML = '';
-                
-                if (!levels || levels.length === 0) {
-                    select.innerHTML = '<option value="">沒有找到級別資料</option>';
-                    return;
-                }
-                
-                levels.forEach(lvl => {
-                    const opt = document.createElement('option');
-                    opt.value = lvl;
-                    opt.innerText = `級別 ${lvl}`;
-                    select.appendChild(opt);
-                });
+        levels.forEach(lvl => {
+          const opt = document.createElement('option');
+          opt.value = lvl;
+          opt.innerText = `級別 ${lvl}`;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        showStatus("⚠️ 無法連線至 Google 試算表後端，請確認 API 網址。", true);
+      }
+    };
 
-                // 自動載入第一個級別的單字
-                loadWordsForLevel();
-            } catch (error) {
-                console.error('無法連線：', error);
-                document.getElementById('levelSelect').innerHTML = '<option value="">連線失敗</option>';
-                showStatus('⚠️ 無法連線至 Google 試算表後端，請檢查網路。', 'error');
-            }
+    // 載入指定級別的單字
+    async function loadWordsForLevel() {
+      const level = document.getElementById('levelSelect').value;
+      if (!level) return;
+
+      showStatus("正在讀取單字...", false);
+      try {
+        const response = await fetch(`${API_URL}?action=getWords&level=${level}`);
+        currentWords = await response.json();
+        
+        if (currentWords.length > 0) {
+          document.getElementById('wordDisplay').innerText = `目標單字：${currentWords[0].word} (${currentWords[0].meaning})`;
+          showStatus(`成功載入 ${currentWords.length} 個單字！`, false);
+        } else {
+          document.getElementById('wordDisplay').innerText = "此級別尚無單字";
+          showStatus("該級別沒有資料", true);
+        }
+      } catch (err) {
+        showStatus("⚠️ 讀取單字失敗", true);
+      }
+    }
+
+    function showStatus(text, isError = false) {
+      const statusBox = document.getElementById('statusMessage');
+      statusBox.style.display = 'block';
+      statusBox.className = 'status-box ' + (isError ? 'status-error' : 'status-success');
+      statusBox.innerText = text;
+    }
+
+    // 語音辨識核心 (因為在 GitHub 獨立網址執行，麥克風權限將正常彈出)
+    function startRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showStatus("⚠️ 您的瀏覽器不支援語音辨識，請使用 Google Chrome。", true);
+        return;
+      }
+
+      if (!recognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = function() {
+          showStatus("🎙️ 聆聽中... 請對著麥克風說出英文單字", false);
         };
 
-        // 載入指定級別單字
-        async function loadWordsForLevel() {
-            const level = document.getElementById('levelSelect').value;
-            if (!level) return;
+        recognition.onresult = function(event) {
+          const transcript = event.results[0][0].transcript;
+          showStatus(`✅ 辨識成功！您說的是：${transcript}`, false);
+        };
 
-            try {
-                showStatus(`正在載入 ${level} 級別單字，請稍候...`, 'info');
-                const response = await fetch(`${API_URL}?action=getWords&level=${level}`);
-                currentWords = await response.json();
+        recognition.onerror = function(event) {
+          if (event.error === 'not-allowed') {
+            showStatus("❌ 麥克風權限被拒絕。請點擊網址列左側鎖頭開啟麥克風權限。", true);
+          } else {
+            showStatus(`❌ 辨識錯誤: ${event.error}`, true);
+          }
+        };
+      }
 
-                if (Array.isArray(currentWords) && currentWords.length > 0) {
-                    currentIndex = 0;
-                    displayCurrentWord();
-                    showStatus(`✅ 成功載入 ${level} 級別！共有 ${currentWords.length} 個單字，準備開始吧！`, 'success');
-                } else {
-                    document.getElementById('wordDisplay').innerText = '無單字';
-                    showStatus('⚠️ 此級別目前沒有找到對應的單字內容。', 'error');
-                }
-            } catch (error) {
-                console.error('載入單字失敗：', error);
-                showStatus('⚠️ 載入單字發生錯誤，請重新整理頁面。', 'error');
-            }
-        }
-
-        // 顯示當前單字
-        function displayCurrentWord() {
-            if (currentWords.length > 0 && currentIndex < currentWords.length) {
-                document.getElementById('wordDisplay').innerText = currentWords[currentIndex];
-            }
-        }
-
-        // 語音辨識核心（含對比與評分提示）
-        function startRecognition() {
-            if (currentWords.length === 0) {
-                alert('請先載入單字！');
-                return;
-            }
-
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('您的瀏覽器不支援語音辨識，請使用 Google Chrome 瀏覽器。');
-                return;
-            }
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.lang = 'en-US'; 
-            recognition.interimResults = false;
-
-            showStatus('🎤 仔細聆聽中... 請大聲唸出上方單字！', 'info');
-
-            recognition.onresult = function(event) {
-                const spokenText = event.results[0][0].transcript.trim().toLowerCase();
-                const targetWord = String(currentWords[currentIndex]).trim().toLowerCase();
-
-                // 判斷是否答對
-                if (spokenText === targetWord) {
-                    showStatus(`⭐ 評分：100分！太棒了！<br>你正確唸出了：<b>${event.results[0][0].transcript}</b>`, 'success');
-                    
-                    // 答對後自動跳到下一個單字
-                    setTimeout(() => {
-                        currentIndex++;
-                        if (currentIndex < currentWords.length) {
-                            displayCurrentWord();
-                            showStatus('🎤 太棒了！請繼續唸下一個單字', 'info');
-                        } else {
-                            document.getElementById('wordDisplay').innerText = '🎉 恭喜通關！';
-                            showStatus('🏆 太神啦！這個級別的單字全部完美通關！', 'success');
-                        }
-                    }, 1500);
-                } else {
-                    // 沒答對時，給予具體的錯誤提示與糾正
-                    showStatus(`❌ 哎呀，差一點點！<br>• 你剛才唸成：<b>"${event.results[0][0].transcript}"</b><br>• 目標單字是：<b>"${currentWords[currentIndex]}"</b><br>💡 建議：注意母音發音，再試一次看看！`, 'error');
-                }
-            };
-
-            recognition.onerror = function(event) {
-                showStatus(`⚠️ 語音辨識沒有聽清楚 (${event.error})，請點擊按鈕再試一次！`, 'error');
-            };
-
-            recognition.start();
-        }
-
-        function showStatus(message, type) {
-            const statusBox = document.getElementById('statusMessage');
-            statusBox.style.display = 'block';
-            statusBox.innerHTML = message;
-            statusBox.className = `status-box status-${type}`;
-        }
-    </script>
+      try {
+        recognition.start();
+      } catch (e) {
+        showStatus("⚠️ 請重新點擊開始按鈕", true);
+      }
+    }
+  </script>
 </body>
 </html>
