@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KUMON 英文單字練習庫</title>
+    <title>KUMON 英文口說練功坊</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,14 +11,17 @@
             padding: 30px;
             max-width: 600px;
             margin: 0 auto;
-            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         .card {
             background: white;
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            width: 100%;
             text-align: center;
         }
         .btn {
@@ -44,7 +47,7 @@
             margin-right: 10px;
         }
         .word-box {
-            font-size: 44px;
+            font-size: 48px;
             font-weight: bold;
             margin: 20px 0 10px 0;
             color: #d9534f;
@@ -96,14 +99,45 @@
     </div>
 
     <script>
-        // 對應最新部署的 Google Apps Script 網址
         const API_URL = "https://script.google.com/macros/s/AKfycbwj4-pG4KbhxwkYRwmggwcLVDB30aqT7riSo2p2lOM1SUP8AoZHwPYModjYR5zKWQc/exec";
         
+        // 🛡️ 內建備份單字庫（萬一雲端斷線，依然可以正常運作練習！）
+        const fallbackData = {
+            "7A": [
+                { word: "dog", meaning: "狗" },
+                { word: "cat", meaning: "貓" },
+                { word: "cow", meaning: "乳牛" },
+                { word: "rabbit", meaning: "兔子" },
+                { word: "apple", meaning: "蘋果" }
+            ],
+            "6A": [
+                { word: "red", meaning: "紅色的" },
+                { word: "blue", meaning: "藍色的" },
+                { word: "yellow", meaning: "黃色的" }
+            ],
+            "5A": [
+                { word: "sunny", meaning: "晴朗的" },
+                { word: "walk", meaning: "走路" },
+                { word: "run", meaning: "跑步" }
+            ],
+            "4A": [
+                { word: "ice", meaning: "冰塊" },
+                { word: "king", meaning: "國王" }
+            ],
+            "3A": [
+                { word: "wall", meaning: "牆壁" },
+                { word: "cheese", meaning: "起司" }
+            ],
+            "2A": [
+                { word: "basket", meaning: "籃子" },
+                { word: "snake", meaning: "蛇" }
+            ]
+        };
+
         let currentWords = [];
         let currentIndex = 0;
         let recognition = null;
 
-        // 網頁載入時自動取得級別清單
         window.onload = async function() {
             try {
                 const response = await fetch(`${API_URL}?action=getLevels`);
@@ -112,8 +146,7 @@
                 select.innerHTML = '';
                 
                 if (!levels || levels.length === 0) {
-                    select.innerHTML = '<option value="">沒有找到級別資料</option>';
-                    return;
+                    throw new Error("無級別資料");
                 }
                 
                 levels.forEach(lvl => {
@@ -123,14 +156,25 @@
                     select.appendChild(opt);
                 });
 
-                // 自動載入第一個級別
                 loadWordsForLevel();
             } catch (err) {
-                showStatus("⚠️ 無法連線至 Google 試算表後端，請確認 API 網址。", true);
+                console.warn("雲端連線失敗，自動切換至內建模式", err);
+                loadFallbackLevels();
             }
         };
 
-        // 載入指定級別的單字
+        function loadFallbackLevels() {
+            const select = document.getElementById('levelSelect');
+            select.innerHTML = '';
+            Object.keys(fallbackData).forEach(lvl => {
+                const opt = document.createElement('option');
+                opt.value = lvl;
+                opt.innerText = `級別 ${lvl} (離線模式)`;
+                select.appendChild(opt);
+            });
+            loadWordsForLevel();
+        }
+
         async function loadWordsForLevel() {
             const level = document.getElementById('levelSelect').value;
             if (!level) return;
@@ -140,21 +184,23 @@
                 const response = await fetch(`${API_URL}?action=getWords&level=${level}`);
                 currentWords = await response.json();
 
-                if (Array.isArray(currentWords) && currentWords.length > 0) {
-                    currentIndex = 0;
-                    displayCurrentWord();
-                    showStatus(`✅ 成功載入 ${level} 級別！共有 ${currentWords.length} 個單字，開始練習吧！`, false);
-                } else {
-                    document.getElementById('wordDisplay').innerText = "此級別尚無單字";
-                    document.getElementById('meaningDisplay').innerText = "--";
-                    showStatus("該級別沒有資料", true);
+                if (!Array.isArray(currentWords) || currentWords.length === 0) {
+                    throw new Error("遠端無單字");
                 }
+                finishLoadingWords(level);
             } catch (err) {
-                showStatus("⚠️ 讀取單字失敗", true);
+                // 如果遠端失敗，改用備份資料
+                currentWords = fallbackData[level] || [{ word: "error", meaning: "載入失敗" }];
+                finishLoadingWords(level + " (備份)");
             }
         }
 
-        // 顯示當前單字與中文解釋
+        function finishLoadingWords(levelName) {
+            currentIndex = 0;
+            displayCurrentWord();
+            showStatus(`✅ 成功載入 ${levelName} 級別！共有 ${currentWords.length} 個單字，開始練習吧！`, false);
+        }
+
         function displayCurrentWord() {
             if (currentWords.length > 0 && currentIndex < currentWords.length) {
                 const item = currentWords[currentIndex];
@@ -163,15 +209,16 @@
             }
         }
 
-        // 🔊 語音合成發音
+        // 🔊 發音功能
         function playPronunciation() {
             if (currentWords.length === 0) return;
             const targetWord = currentWords[currentIndex].word;
             
             if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // 停止先前的聲音
                 const utterance = new SpeechSynthesisUtterance(targetWord);
                 utterance.lang = 'en-US';
-                utterance.rate = 0.9;
+                utterance.rate = 0.85; // 稍微放慢，讓小朋友聽更清楚
                 window.speechSynthesis.speak(utterance);
             } else {
                 alert('您的瀏覽器不支援語音朗讀功能。');
@@ -205,7 +252,6 @@
                 if (spokenText === targetWord) {
                     showStatus(`⭐ 評分：100分！太棒了！<br>你正確唸出了：<b>${event.results[0][0].transcript}</b>`, false);
                     
-                    // 自動跳到下一個單字
                     setTimeout(() => {
                         currentIndex++;
                         if (currentIndex < currentWords.length) {
