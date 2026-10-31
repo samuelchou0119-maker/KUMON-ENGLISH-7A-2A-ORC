@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
-  <base target="_top">
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KUMON 英文單字練習庫</title>
   <style>
     body {
@@ -30,6 +30,8 @@
       margin: 5px;
     }
     .btn-success { background-color: #28a745; }
+    .btn-primary { background-color: #007bff; }
+    select { padding: 10px; font-size: 16px; border-radius: 6px; margin-right: 10px; }
     .status-box { margin-top: 15px; padding: 12px; border-radius: 5px; font-weight: bold; }
     .status-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
@@ -38,18 +40,81 @@
 <body>
 
   <div class="card">
-    <h2>KUMON 英文口說練功坊</h2>
-    <p>🎤 請點擊下方按鈕開始進行語音辨識練習：</p>
+    <h2>KUMON 英文口說練功坊 (GitHub 獨立前端)</h2>
     
+    <div style="margin-bottom: 15px;">
+      <label for="levelSelect">選擇級別：</label>
+      <select id="levelSelect">
+        <option value="">載入中...</option>
+      </select>
+      <button class="btn btn-primary" onclick="loadWordsForLevel()">載入單字</button>
+    </div>
+
+    <div id="wordDisplay" style="font-size: 20px; font-weight: bold; margin: 15px 0; color: #333;">
+      請先選擇級別並載入單字
+    </div>
+
     <div>
-      <button class="btn btn-success" onclick="startRecognition()">▶ 開始說英文單字</button>
+      <button class="btn btn-success" onclick="startRecognition()">🎤 開始說英文單字進行辨識</button>
     </div>
 
     <div id="statusMessage" class="status-box" style="display: none;"></div>
   </div>
 
   <script>
+    // ==========================================
+    // 請將下方引號內替換為你的 Google Apps Script 部署網址 (/exec)
+    // ==========================================
+    const API_URL = "https://script.google.com/a/macros/kumon-km.com.tw/s/YOUR_DEPLOYMENT_ID/exec";
+
+    let currentWords = [];
     let recognition = null;
+
+    // 網頁載入時自動取得級別清單
+    window.onload = async function() {
+      try {
+        const response = await fetch(`${API_URL}?action=getLevels`);
+        const levels = await response.json();
+        const select = document.getElementById('levelSelect');
+        select.innerHTML = '';
+        
+        if (levels.length === 0) {
+          select.innerHTML = '<option value="">沒有找到級別資料</option>';
+          return;
+        }
+
+        levels.forEach(lvl => {
+          const opt = document.createElement('option');
+          opt.value = lvl;
+          opt.innerText = `級別 ${lvl}`;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        showStatus("⚠️ 無法連線至 Google 試算表後端，請確認 API 網址是否正確。", true);
+      }
+    };
+
+    // 載入指定級別的單字
+    async function loadWordsForLevel() {
+      const level = document.getElementById('levelSelect').value;
+      if (!level) return;
+
+      showStatus("正在讀取單字...", false);
+      try {
+        const response = await fetch(`${API_URL}?action=getWords&level=${level}`);
+        currentWords = await response.json();
+        
+        if (currentWords.length > 0) {
+          document.getElementById('wordDisplay').innerText = `目標單字：${currentWords[0].word} (${currentWords[0].meaning})` ;
+          showStatus(`成功載入 ${currentWords.length} 個單字！`, false);
+        } else {
+          document.getElementById('wordDisplay').innerText = "此級別尚無單字";
+          showStatus("該級別沒有資料", true);
+        }
+      } catch (err) {
+        showStatus("⚠️ 讀取單字失敗", true);
+      }
+    }
 
     function showStatus(text, isError = false) {
       const statusBox = document.getElementById('statusMessage');
@@ -58,6 +123,7 @@
       statusBox.innerText = text;
     }
 
+    // 語音辨識核心 (因為在 GitHub 獨立網址執行，麥克風權限 100% 正常彈出)
     function startRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -72,7 +138,7 @@
         recognition.interimResults = false;
 
         recognition.onstart = function() {
-          showStatus("🎙️ 聆聽中... 請對著麥克風說出單字", false);
+          showStatus("🎙️ 聆聽中... 請對著麥克風說出英文單字", false);
         };
 
         recognition.onresult = function(event) {
@@ -82,7 +148,7 @@
 
         recognition.onerror = function(event) {
           if (event.error === 'not-allowed') {
-            showStatus("❌ 麥克風權限被拒絕 (not-allowed)。請檢查瀏覽器設定或系統設定允許存取麥克風。", true);
+            showStatus("❌ 麥克風權限被拒絕。請點擊網址列左側鎖頭開啟麥克風權限。", true);
           } else {
             showStatus(`❌ 辨識錯誤: ${event.error}`, true);
           }
