@@ -62,10 +62,8 @@
   </div>
 
   <script>
-    // ==========================================
-    // 請將下方引號內替換為你的 Google Apps Script 部署網址 (/exec)
-    // ==========================================
-    const API_URL = "https://script.google.com/a/macros/kumon-km.com.tw/s/YOUR_DEPLOYMENT_ID/exec";
+    // 已經幫你填入剛剛從 Apps Script 產生的最新 API 網址
+    const API_URL = "https://script.google.com/macros/s/AKfycbwj4-pG4KbhxwkYRwmggwcLVDB30aqT7riSo2p2lOM1SUP8AoZHwPYModjYR5zKWQc/exec";
 
     let currentWords = [];
     let recognition = null;
@@ -90,7 +88,7 @@
           select.appendChild(opt);
         });
       } catch (err) {
-        showStatus("⚠️ 無法連線至 Google 試算表後端，請確認 API 網址是否正確。", true);
+        showStatus("⚠️ 無法連線至 Google 試算表後端，請確認 API 網址。", true);
       }
     };
 
@@ -105,7 +103,7 @@
         currentWords = await response.json();
         
         if (currentWords.length > 0) {
-          document.getElementById('wordDisplay').innerText = `目標單字：${currentWords[0].word} (${currentWords[0].meaning})` ;
+          document.getElementById('wordDisplay').innerText = `目標單字：${currentWords[0].word} (${currentWords[0].meaning})`;
           showStatus(`成功載入 ${currentWords.length} 個單字！`, false);
         } else {
           document.getElementById('wordDisplay').innerText = "此級別尚無單字";
@@ -123,7 +121,7 @@
       statusBox.innerText = text;
     }
 
-    // 語音辨識核心 (因為在 GitHub 獨立網址執行，麥克風權限 100% 正常彈出)
+    // 語音辨識核心 (因為在 GitHub 獨立網址執行，麥克風權限將正常彈出)
     function startRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
